@@ -76,6 +76,16 @@ button{font:inherit; color:inherit; cursor:pointer}
 .btn-fort{background:var(--nuit); color:var(--sur-nuit); border-color:var(--nuit)}
 .etat{margin-left:auto; font-size:13px; color:var(--doux)}
 
+/* ---------- lecture seule ---------- */
+body.lecture #btn-ajout, body.lecture #btn-reset,
+body.lecture .ajout, body.lecture .evt .actions{display:none}
+body.lecture .statut{pointer-events:none; opacity:.8}
+body.lecture .evt input, body.lecture .evt select,
+body.lecture .evt textarea, body.lecture #notes{
+  background:transparent; cursor:default; border-color:transparent;
+}
+#btn-code[data-ouvert="oui"]{background:var(--nuit); color:var(--sur-nuit); border-color:var(--nuit)}
+
 /* ---------- aperçu de l'année ---------- */
 .apercu{padding:32px 0 8px}
 .rythme{display:grid; grid-template-columns:repeat(12,1fr); gap:6px; align-items:end}
@@ -185,6 +195,7 @@ input:focus,select:focus,textarea:focus{outline:none; border-bottom-color:var(--
 
 <div class="outils">
   <div class="wrap">
+    <button class="btn" id="btn-code" data-ouvert="non">Déverrouiller l'édition</button>
     <button class="btn btn-fort" id="btn-ajout">Ajouter un temps</button>
     <button class="btn" id="btn-ics">Exporter vers mon agenda</button>
     <button class="btn" id="btn-print">Imprimer</button>
@@ -207,9 +218,16 @@ input:focus,select:focus,textarea:focus{outline:none; border-bottom-color:var(--
   <textarea id="notes" placeholder="Décisions, personnes à relancer, idées pour l'an prochain…"></textarea>
 </footer>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.116.0/dist/umd/supabase.js"></script>
 <script>
 (function(){
 "use strict";
+
+/* Base partagée : lecture ouverte à tous, écriture derrière le code d'équipe.
+   La clé ci-dessous est la clé publique du projet, elle n'ouvre rien à elle seule. */
+var SUPABASE_URL = "https://fhokebzztljmsopjhcdy.supabase.co";
+var SUPABASE_CLE = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZob2tlYnp6dGxqbXNvcGpoY2R5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODk2MjYxODIsImV4cCI6MjEwNTIwMjE4Mn0.gGeGG3XI1AwuZMLCsTTY2hmRFh12mdUbvvrGcL-DqmI";
+var DOC = "saison-2026-2027";
 
 var TYPES = {
   rentree:   {nom:"Rentrée",        var:"--rentree"},
@@ -302,8 +320,11 @@ function proposition(){
 /* ---------------- état ---------------- */
 var etat = {events: proposition(), notes: ""};
 var masques = {};
-var db = null, docRef = null, localOK = true;
+var sb = null, versionDoc = null, code = null, localOK = true;
+var distant = null, enAttente = false;
 var CLE = "planning-louange-2026-2027";
+var CLE_CODE = "planning-louange-code";
+function peutEcrire(){ return !!code; }
 
 function couleur(t){ return "var(" + (TYPES[t] ? TYPES[t].var : "--autre") + ")"; }
 
@@ -417,6 +438,7 @@ function rendu(){
   });
 
   document.querySelectorAll(".f-notes").forEach(pousse);
+  appliqueVerrou();
 }
 
 function carte(ev){
@@ -465,6 +487,7 @@ function trouve(id){
 var annee = document.getElementById("annee");
 
 annee.addEventListener("input", function(ev){
+  if(!peutEcrire()) return;
   var art = ev.target.closest(".evt"); if(!art) return;
   var o = trouve(art.dataset.id); if(!o) return;
   var t = ev.target;
@@ -478,6 +501,7 @@ annee.addEventListener("input", function(ev){
 });
 
 annee.addEventListener("change", function(ev){
+  if(!peutEcrire()) return;
   var art = ev.target.closest(".evt"); if(!art) return;
   var o = trouve(art.dataset.id); if(!o) return;
   var t = ev.target;
@@ -491,6 +515,7 @@ annee.addEventListener("change", function(ev){
 });
 
 annee.addEventListener("click", function(ev){
+  if(!peutEcrire()) return;
   var art = ev.target.closest(".evt"); if(!art) return;
   var o = trouve(art.dataset.id); if(!o) return;
   var t = ev.target;
@@ -511,6 +536,7 @@ annee.addEventListener("click", function(ev){
 });
 
 function ajouter(date){
+  if(!peutEcrire()) return;
   var n = {id:"e" + (++e.n) + "-" + Date.now().toString(36), date:date, titre:"",
            type:"autre", heure:"", lieu:"", qui:"", notes:"", statut:"a-caler"};
   etat.events.push(n);
@@ -527,13 +553,17 @@ document.getElementById("btn-ajout").addEventListener("click", function(){
 document.getElementById("btn-print").addEventListener("click", function(){ window.print(); });
 
 document.getElementById("btn-reset").addEventListener("click", function(){
+  if(!peutEcrire()) return;
   if(!confirm("Remplacer le planning actuel par la proposition de départ ? Tes modifications seront perdues.")) return;
   etat.events = proposition(); etat.notes = document.getElementById("notes").value;
   planifie(); rendu();
 });
 
 var notes = document.getElementById("notes");
-notes.addEventListener("input", function(){ etat.notes = notes.value; pousse(notes); planifie(); });
+notes.addEventListener("input", function(){
+  if(!peutEcrire()){ notes.value = etat.notes; return; }
+  etat.notes = notes.value; pousse(notes); planifie();
+});
 
 /* ---------------- export agenda ---------------- */
 function ics(){
@@ -580,22 +610,80 @@ document.getElementById("btn-ics").addEventListener("click", async function(){
 var timer = null, etatEl = document.getElementById("etat");
 function dis(t){ etatEl.textContent = t; }
 function planifie(){
+  if(!peutEcrire()) return;
   dis("Modifications en cours…");
+  enAttente = true;
   clearTimeout(timer);
   timer = setTimeout(enregistre, 700);
 }
-async function enregistre(){
-  var corps = {events: etat.events, notes: etat.notes, maj: new Date().toISOString()};
-  var ok = false;
-  if(docRef){
-    try{ await docRef.set(corps); ok = true; }catch(err){ ok = false; }
+function maintenant(){
+  var h = new Date();
+  return String(h.getHours()).padStart(2,"0") + ":" + String(h.getMinutes()).padStart(2,"0");
+}
+
+/* Le verrou : sans code, la page se lit mais ne s'écrit pas. */
+var btnCode = document.getElementById("btn-code");
+function appliqueVerrou(){
+  var ferme = !peutEcrire();
+  document.body.classList.toggle("lecture", ferme);
+  document.querySelectorAll("#annee input, #annee textarea").forEach(function(c){ c.readOnly = ferme; });
+  document.querySelectorAll("#annee select").forEach(function(c){ c.disabled = ferme; });
+  notes.readOnly = ferme;
+  btnCode.textContent = ferme ? "Déverrouiller l'édition" : "Verrouiller";
+  btnCode.dataset.ouvert = ferme ? "non" : "oui";
+}
+function retientCode(c){
+  code = c;
+  try{ c ? localStorage.setItem(CLE_CODE, c) : localStorage.removeItem(CLE_CODE); }catch(err){}
+  appliqueVerrou();
+}
+
+btnCode.addEventListener("click", async function(){
+  if(peutEcrire()){ retientCode(null); dis("Édition verrouillée"); return; }
+  var saisi = prompt("Code d'accès de l'équipe :");
+  if(!saisi) return;
+  if(!sb){ dis("Serveur injoignable — impossible de vérifier le code"); return; }
+  dis("Vérification…");
+  try{
+    var r = await sb.rpc("verifier_code", {p_code: saisi});
+    if(r.error) throw r.error;
+    if(r.data === true){ retientCode(saisi); dis("Édition déverrouillée"); }
+    else dis("Code refusé");
+  }catch(err){
+    dis(/Trop de tentatives/.test(String(err && err.message)) ?
+        "Trop de tentatives — réessaie dans un quart d'heure" : "Vérification impossible");
   }
+});
+
+async function enregistre(){
+  timer = null; enAttente = false;
+  var corps = {events: etat.events, notes: etat.notes, maj: new Date().toISOString()};
   if(localOK){
     try{ localStorage.setItem(CLE, JSON.stringify(corps)); }catch(err){ localOK = false; }
   }
-  var h = new Date();
-  dis((ok ? "Enregistré à " : "Gardé dans ce navigateur, ") +
-      String(h.getHours()).padStart(2,"0") + ":" + String(h.getMinutes()).padStart(2,"0"));
+  if(!sb || !peutEcrire()){ dis("Gardé dans ce navigateur, " + maintenant()); return; }
+
+  try{
+    var r = await sb.rpc("enregistrer_planning", {p_code: code, p_corps: corps, p_version: versionDoc});
+    if(r.error) throw r.error;
+    var ligne = Array.isArray(r.data) ? r.data[0] : r.data;
+    if(ligne && ligne.version) versionDoc = ligne.version;
+    dis("Enregistré à " + maintenant());
+  }catch(err){
+    var m = String(err && (err.message || err.hint) || "");
+    if(/entre-temps/.test(m)){
+      dis("Quelqu'un a modifié le planning en même temps — rechargement");
+      await relis("Planning rechargé depuis le serveur");
+    } else if(/invalide/.test(m)){
+      retientCode(null);
+      dis("Code refusé — la page repasse en lecture seule");
+    } else if(/Trop de tentatives/.test(m)){
+      dis("Trop de tentatives — réessaie dans un quart d'heure");
+    } else {
+      dis("Serveur injoignable — gardé dans ce navigateur");
+    }
+  }
+  appliqueDistant();
 }
 
 function charge(corps){
@@ -609,27 +697,70 @@ function charge(corps){
   return true;
 }
 
+/* Relire le planning partagé. */
+async function relis(msg){
+  if(!sb) return false;
+  try{
+    var r = await sb.from("planning").select("corps,version").eq("id", DOC).maybeSingle();
+    if(r.error) throw r.error;
+    if(!r.data){
+      dis(peutEcrire() ? "Planning partagé encore vide — enregistrement de la proposition…"
+                       : "Planning partagé encore vide — proposition de départ affichée");
+      return false;
+    }
+    versionDoc = r.data.version;
+    if(charge(r.data.corps)){ rendu(); pousse(notes); }
+    dis(msg);
+    return true;
+  }catch(err){
+    dis("Serveur injoignable — version locale affichée");
+    return false;
+  }
+}
+
+/* Une modification arrive d'ailleurs : on l'applique dès que la personne
+   n'est pas en train de taper, pour ne pas lui retirer le texte des mains. */
+function appliqueDistant(){
+  if(!distant) return;
+  var a = document.activeElement;
+  var occupe = a && (a === notes || (a.closest && a.closest("#annee")));
+  if(occupe || enAttente) return;
+  var d = distant; distant = null;
+  versionDoc = d.version;
+  if(charge(d.corps)){ rendu(); pousse(notes); dis("Mis à jour par quelqu'un d'autre à " + maintenant()); }
+}
+document.addEventListener("focusout", function(){ setTimeout(appliqueDistant, 300); });
+
 rendu();
 pousse(notes);
 
 (async function demarre(){
-  var local = null;
   try{
     var brut = localStorage.getItem(CLE);
-    if(brut) local = JSON.parse(brut);
+    var local = brut ? JSON.parse(brut) : null;
+    if(local && charge(local)){ rendu(); pousse(notes); dis("Version gardée dans ce navigateur"); }
   }catch(err){ localOK = false; }
-  if(local && charge(local)){ rendu(); pousse(notes); dis("Version gardée dans ce navigateur"); }
 
-  var base = null;
-  try{ base = await window.claude.use("db"); }catch(err){ base = null; }
-  if(!base) return;
-  db = base;
-  docRef = db.doc("planning/saison-2026-2027");
-  try{
-    var snap = await docRef.get();
-    if(snap && snap.exists && charge(snap.data())){ rendu(); pousse(notes); dis("Planning chargé"); }
-    else{ await enregistre(); }
-  }catch(err){ docRef = null; }
+  try{ code = localStorage.getItem(CLE_CODE) || null; }catch(err){ code = null; }
+  appliqueVerrou();
+
+  if(!window.supabase){ dis("Planning partagé injoignable — modifications locales seulement"); return; }
+  try{ sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_CLE); }catch(err){ sb = null; }
+  if(!sb){ dis("Planning partagé injoignable — modifications locales seulement"); return; }
+  appliqueVerrou();
+
+  var present = await relis("Planning partagé chargé");
+  if(!present && peutEcrire()) await enregistre();
+
+  sb.channel("planning-" + DOC)
+    .on("postgres_changes",
+        {event:"*", schema:"public", table:"planning", filter:"id=eq." + DOC},
+        function(msg){
+          if(!msg.new || msg.new.version === versionDoc) return;
+          distant = msg.new;
+          appliqueDistant();
+        })
+    .subscribe();
 })();
 
 ORDRE_TYPES.forEach(function(t){

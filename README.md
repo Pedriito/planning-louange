@@ -4,8 +4,8 @@ Planning annuel de la section Louange de l'Église la Rencontre : la rentrée, l
 toutes les deux semaines, un séminaire par trimestre, un jeûne et prière par mois, un
 temps détente mensuel et une formation spirituelle ou technique tous les deux mois.
 
-Tout tient dans un seul fichier HTML, sans build ni dépendance. Ouvrir `index.html`
-dans un navigateur suffit.
+Une seule page HTML, sans build. L'équipe l'édite à plusieurs : la page est ouverte
+en lecture à tous, et l'édition se déverrouille avec le code de la section.
 
 ## Ce qu'il y a dedans
 
@@ -39,31 +39,57 @@ Les types possibles sont `rentree`, `priere`, `jeune`, `seminaire`, `detente`,
 son nom dans `ORDRE_TYPES` et une variable de couleur dans le CSS (mode clair et
 mode sombre).
 
-## Sauvegarde
+## Édition à plusieurs
 
-Deux chemins, dans cet ordre :
+Le planning vit dans une base Supabase partagée. Concrètement :
 
-1. Publié comme artefact Claude, le planning utilise la base partagée de l'artefact
-   (`claude.use("db")`, document `planning/saison-2026-2027`). Toutes les personnes qui
-   ont l'accès en édition travaillent sur les mêmes données.
-2. Partout ailleurs — fichier local, GitHub Pages, Vercel — il n'y a pas de base
-   partagée : `window.claude` n'existe pas et le code retombe sur `localStorage`.
-   Chacun garde alors ses modifications dans son propre navigateur.
+- **Tout le monde lit.** Ouvrir l'URL suffit, sans compte ni code.
+- **L'équipe écrit.** Le bouton « Déverrouiller l'édition » demande le code d'équipe.
+  Sans lui, les champs sont en lecture seule et les boutons d'ajout disparaissent.
+- **Chacun voit les autres en direct.** Une modification enregistrée arrive dans les
+  autres navigateurs ouverts en une seconde ou deux, sans rechargement. La page attend
+  que tu aies fini de taper avant d'appliquer un changement venu d'ailleurs.
 
-C'est le point à garder en tête avant de déployer : héberger le fichier donne une URL
-publique, pas de l'édition à plusieurs. Pour du vrai travail collaboratif il faut soit
-partager l'artefact, soit brancher un backend (Supabase ferait l'affaire, la logique de
-chargement et d'enregistrement est déjà isolée dans `charge()` et `enregistre()`).
+Le code n'est pas dans ce dépôt — demande-le au responsable de la section. Il est gardé
+haché en base (bcrypt) et vérifié côté serveur ; dix essais ratés par quart d'heure et
+par adresse IP et la vérification se ferme. Une fois saisi, il reste dans le navigateur
+pour ne pas avoir à le retaper.
+
+La table `planning` est en lecture seule pour la clé publique : la seule écriture
+possible passe par la fonction `enregistrer_planning`, qui exige le code. La clé
+publique dans `index.html` n'ouvre donc rien à elle seule.
+
+Pour changer le code : `select changer_code('<code actuel>', '<nouveau>');`
+
+Si la base est injoignable, la page retombe sur `localStorage` et le dit dans la barre
+d'état — les modifications restent alors dans le navigateur.
+
+## Ce qu'il y a côté base
+
+`supabase/schema.sql` contient tout : tables, RLS, fonctions. Rejouable sur un projet
+neuf. Trois tables, une seule ligne de données utile :
+
+- `planning` — le planning entier en `jsonb`, avec un compteur `version`.
+- `planning_acces` — le code haché, illisible depuis l'extérieur.
+- `planning_tentatives` — les essais ratés, pour le plafond par IP.
+
+Le compteur `version` sert à ne pas écraser le travail d'un autre : si la version a
+bougé pendant que tu éditais, l'enregistrement est refusé et la page recharge la version
+du serveur. Rare, puisque tout le monde reçoit les changements en direct, mais dans ce
+cas la modification en cours est perdue — c'est la limite connue du système.
 
 ## Déployer
 
-GitHub Pages : pousser le dépôt, puis Settings → Pages → branche `main`, dossier racine.
+GitHub Pages : Settings → Pages → branche `main`, dossier racine.
 
 Vercel : importer le dépôt, aucun réglage de build, le fichier est servi tel quel.
+
+Dans les deux cas rien à configurer : l'URL et la clé publique Supabase sont dans
+`index.html`.
 
 ## Pistes
 
 - Suivi des présences ou des rotations par temps.
 - Un second onglet pour le planning des cultes, à côté du planning interne.
 - Import depuis Planning Center plutôt que saisie manuelle.
-- Backend partagé (voir plus haut) si l'équipe veut éditer à plusieurs hors de Claude.
+- Un rôle « lecture seule » distinct du code d'édition, si la section grandit.
