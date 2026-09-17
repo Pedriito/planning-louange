@@ -505,14 +505,33 @@ annee.addEventListener("change", function(ev){
   var art = ev.target.closest(".evt"); if(!art) return;
   var o = trouve(art.dataset.id); if(!o) return;
   var t = ev.target;
-  if(t.classList.contains("f-date")){ o.date = t.value; planifie(); rendu(); }
+  if(t.classList.contains("f-date")){
+    o.date = t.value;
+    var jour = art.querySelector(".jour");
+    if(jour) jour.textContent = dateFr(o.date);
+    planifie(); rendreAuDepart(t);
+  }
   else if(t.classList.contains("f-type")){
     o.type = t.value;
     art.dataset.type = o.type;
     art.style.setProperty("--c", couleur(o.type));
-    planifie(); rendu();
+    planifie(); rendreAuDepart(t);
   }
 });
+
+/* Un champ date se remplit segment par segment : reconstruire la page à chaque
+   segment arracherait le champ des doigts de la personne. On note qu'il faudra
+   remettre de l'ordre, et on le fait quand elle quitte le champ. */
+var aRemettreEnOrdre = false;
+function rendreAuDepart(champ){
+  if(aRemettreEnOrdre) return;
+  aRemettreEnOrdre = true;
+  champ.addEventListener("blur", function(){
+    if(!aRemettreEnOrdre) return;
+    aRemettreEnOrdre = false;
+    rendu();
+  }, {once: true});
+}
 
 annee.addEventListener("click", function(ev){
   if(!peutEcrire()) return;
@@ -720,8 +739,17 @@ async function relis(msg){
 
 /* Une modification arrive d'ailleurs : on l'applique dès que la personne
    n'est pas en train de taper, pour ne pas lui retirer le texte des mains. */
+function memeContenu(corps){
+  if(!corps) return false;
+  try{
+    return JSON.stringify(corps.events) === JSON.stringify(etat.events) &&
+           (corps.notes || "") === (etat.notes || "");
+  }catch(err){ return false; }
+}
+
 function appliqueDistant(){
   if(!distant) return;
+  if(memeContenu(distant.corps)){ versionDoc = distant.version; distant = null; return; }
   var a = document.activeElement;
   var occupe = a && (a === notes || (a.closest && a.closest("#annee")));
   if(occupe || enAttente) return;
@@ -757,6 +785,8 @@ pousse(notes);
         {event:"*", schema:"public", table:"planning", filter:"id=eq." + DOC},
         function(msg){
           if(!msg.new || msg.new.version === versionDoc) return;
+          /* Notre propre écriture nous revient : même contenu, rien à refaire. */
+          if(memeContenu(msg.new.corps)){ versionDoc = msg.new.version; return; }
           distant = msg.new;
           appliqueDistant();
         })
