@@ -1,0 +1,644 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Louange — planning de la saison 2026-2027</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+<style>
+:root{
+  --papier:#EDEEE9;
+  --carte:#FBFBF8;
+  --encre:#1C242A;
+  --doux:#5D6A72;
+  --trait:#D6D9D0;
+  --nuit:#16242C;
+  --sur-nuit:#E9EEE9;
+  --rentree:#B3512C;
+  --priere:#3D5F9E;
+  --jeune:#6E4B86;
+  --seminaire:#17695C;
+  --detente:#A87710;
+  --formation:#55742A;
+  --autre:#6B7280;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --papier:#111A1E; --carte:#1A2429; --encre:#E7EBE6; --doux:#97A5AC; --trait:#2B3841;
+    --nuit:#0C1317; --sur-nuit:#E7EBE6;
+    --rentree:#E08A62; --priere:#8FAEE0; --jeune:#B694CC; --seminaire:#4FB7A3;
+    --detente:#DDB44F; --formation:#A6C76C; --autre:#9CA3AF;
+  }
+}
+:root[data-theme="dark"]{
+  --papier:#111A1E; --carte:#1A2429; --encre:#E7EBE6; --doux:#97A5AC; --trait:#2B3841;
+  --nuit:#0C1317; --sur-nuit:#E7EBE6;
+  --rentree:#E08A62; --priere:#8FAEE0; --jeune:#B694CC; --seminaire:#4FB7A3;
+  --detente:#DDB44F; --formation:#A6C76C; --autre:#9CA3AF;
+}
+
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{
+  margin:0; background:var(--papier); color:var(--encre);
+  font-family:"Atkinson Hyperlegible", system-ui, -apple-system, "Segoe UI", sans-serif;
+  font-size:16px; line-height:1.5;
+}
+.wrap{max-width:900px; margin:0 auto; padding:0 20px}
+
+/* ---------- bandeau ---------- */
+.bandeau{background:var(--nuit); color:var(--sur-nuit); padding:44px 0 36px}
+.bandeau .wrap{display:flex; flex-wrap:wrap; align-items:flex-end; gap:8px 28px}
+h1{
+  font-family:"Instrument Serif", Georgia, serif; font-weight:400;
+  font-size:clamp(46px,9vw,78px); line-height:.94; margin:0; letter-spacing:-.01em;
+}
+.saison{
+  font-family:"Instrument Serif", Georgia, serif; font-style:italic;
+  font-size:clamp(22px,4vw,30px); opacity:.72; margin:0 0 6px;
+}
+.chapo{flex-basis:100%; margin:16px 0 0; max-width:56ch; opacity:.78}
+
+/* ---------- barre d'outils ---------- */
+.outils{
+  position:sticky; top:0; z-index:20; background:var(--papier);
+  border-bottom:1px solid var(--trait);
+}
+.outils .wrap{display:flex; flex-wrap:wrap; align-items:center; gap:10px; padding-top:10px; padding-bottom:10px}
+button{font:inherit; color:inherit; cursor:pointer}
+.btn{
+  background:var(--carte); border:1px solid var(--trait); border-radius:2px;
+  padding:7px 13px; font-size:14px;
+}
+.btn:hover{border-color:var(--doux)}
+.btn-fort{background:var(--nuit); color:var(--sur-nuit); border-color:var(--nuit)}
+.etat{margin-left:auto; font-size:13px; color:var(--doux)}
+
+/* ---------- aperçu de l'année ---------- */
+.apercu{padding:32px 0 8px}
+.rythme{display:grid; grid-template-columns:repeat(12,1fr); gap:6px; align-items:end}
+.mois-col{
+  background:none; border:0; padding:0 0 4px; display:flex; flex-direction:column;
+  align-items:center; gap:3px; border-bottom:1px solid var(--trait);
+}
+.mois-col:hover .m-lettre{color:var(--encre)}
+.pile{display:flex; flex-direction:column-reverse; gap:2px; min-height:8px; width:100%; align-items:center}
+.pt{width:100%; max-width:18px; height:6px; border-radius:1px; background:var(--c)}
+.m-lettre{font-size:12px; color:var(--doux); padding-top:6px}
+.m-nb{font-size:11px; color:var(--doux); opacity:.7}
+
+.legende{display:flex; flex-wrap:wrap; gap:8px; margin:22px 0 0}
+.filtre{
+  display:inline-flex; align-items:center; gap:7px; font-size:13.5px;
+  background:var(--carte); border:1px solid var(--trait); border-radius:2px; padding:5px 11px;
+}
+.filtre .puce{width:9px; height:9px; border-radius:50%; background:var(--c)}
+.filtre[aria-pressed="false"]{opacity:.38}
+.filtre .n{color:var(--doux)}
+
+/* ---------- mois ---------- */
+.mois{padding:34px 0 6px; border-top:1px solid var(--trait); margin-top:28px}
+.mois:first-of-type{border-top:0}
+.mois-tete{display:flex; align-items:baseline; gap:14px; margin-bottom:14px}
+.mois-tete h2{
+  font-family:"Instrument Serif", Georgia, serif; font-weight:400;
+  font-size:34px; margin:0; letter-spacing:.01em;
+}
+.mois-tete .an{color:var(--doux); font-size:15px}
+.mois-tete .ajout{margin-left:auto}
+.vide{color:var(--doux); font-style:italic; padding:6px 0 4px}
+
+/* ---------- évènement ---------- */
+.evt{
+  display:flex; gap:0; background:var(--carte); border:1px solid var(--trait);
+  border-radius:2px; margin-bottom:9px; overflow:hidden;
+}
+.evt .bande{width:5px; background:var(--c); flex:none}
+.evt .corps{flex:1; padding:11px 13px 12px; min-width:0}
+.l1{display:flex; flex-wrap:wrap; align-items:center; gap:10px}
+.l2{display:flex; flex-wrap:wrap; align-items:center; gap:8px 12px; margin-top:7px}
+input,select,textarea{
+  font:inherit; color:inherit; background:transparent; border:0;
+  border-bottom:1px solid transparent; border-radius:0; padding:2px 0; min-width:0;
+}
+input:hover,select:hover,textarea:hover{border-bottom-color:var(--trait)}
+input:focus,select:focus,textarea:focus{outline:none; border-bottom-color:var(--c)}
+.f-date{width:9.4em; color:var(--doux); font-size:14px}
+.f-titre{flex:1; min-width:180px; font-weight:700; font-size:17px}
+.f-type{
+  font-size:12.5px; color:var(--c); font-weight:700; padding:3px 6px;
+  border:1px solid var(--c); border-radius:2px;
+  background:color-mix(in srgb, var(--c) 10%, transparent);
+}
+.f-type option{color:var(--encre); background:var(--carte)}
+.mini{font-size:14px; color:var(--doux)}
+.f-heure{width:5.5em} .f-lieu{width:11em} .f-qui{width:11em}
+.f-notes{
+  display:block; width:100%; margin-top:8px; resize:none; overflow:hidden;
+  font-size:14.5px; color:var(--doux); line-height:1.45; min-height:1.5em;
+}
+.statut{
+  font-size:12px; border:1px solid var(--trait); background:transparent;
+  border-radius:20px; padding:2px 10px; color:var(--doux);
+}
+.statut[data-s="confirme"]{border-color:var(--c); color:var(--c); font-weight:700}
+.actions{margin-left:auto; display:flex; gap:4px}
+.ic{border:0; background:transparent; color:var(--doux); font-size:13px; padding:3px 6px; border-radius:2px}
+.ic:hover{color:var(--encre); background:color-mix(in srgb, var(--doux) 14%, transparent)}
+
+/* ---------- pied ---------- */
+.pied{margin:40px 0 70px; border-top:1px solid var(--trait); padding-top:22px}
+.pied h3{font-family:"Instrument Serif",Georgia,serif; font-weight:400; font-size:24px; margin:0 0 8px}
+#notes{width:100%; min-height:5em; font-size:15px; border-bottom:1px solid var(--trait)}
+
+:focus-visible{outline:2px solid var(--priere); outline-offset:2px}
+@media (max-width:620px){
+  .rythme{gap:4px}
+  .m-nb{display:none}
+  .f-date{width:8.6em}
+  .f-lieu,.f-qui{width:9em}
+  .outils .wrap{gap:8px}
+  .etat{flex-basis:100%; margin-left:0}
+}
+@media print{
+  .outils,.legende,.actions,.ajout,.apercu{display:none !important}
+  body{background:#fff; color:#000; font-size:11.5pt}
+  .bandeau{background:#fff; color:#000; padding:0 0 12px}
+  .evt{break-inside:avoid; border-color:#bbb}
+  .mois{break-inside:avoid; padding-top:18px; margin-top:14px}
+  input,select,textarea{color:#000}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none !important; animation:none !important}}
+</style>
+</head>
+<body>
+
+<header class="bandeau">
+  <div class="wrap">
+    <h1>Louange</h1>
+    <p class="saison">saison 2026 – 2027</p>
+    <p class="chapo">Le planning interne de l'équipe : la rentrée, la prière toutes les deux semaines, un séminaire par trimestre, un jeûne chaque mois, un temps détente mensuel et une formation tous les deux mois. Tout est modifiable — clique dans un champ pour l'ajuster.</p>
+  </div>
+</header>
+
+<div class="outils">
+  <div class="wrap">
+    <button class="btn btn-fort" id="btn-ajout">Ajouter un temps</button>
+    <button class="btn" id="btn-ics">Exporter vers mon agenda</button>
+    <button class="btn" id="btn-print">Imprimer</button>
+    <button class="btn" id="btn-reset">Repartir de la proposition</button>
+    <span class="etat" id="etat"></span>
+  </div>
+</div>
+
+<section class="apercu">
+  <div class="wrap">
+    <div class="rythme" id="rythme"></div>
+    <div class="legende" id="legende"></div>
+  </div>
+</section>
+
+<main class="wrap" id="annee"></main>
+
+<footer class="wrap pied">
+  <h3>Notes de saison</h3>
+  <textarea id="notes" placeholder="Décisions, personnes à relancer, idées pour l'an prochain…"></textarea>
+</footer>
+
+<script>
+(function(){
+"use strict";
+
+var TYPES = {
+  rentree:   {nom:"Rentrée",        var:"--rentree"},
+  priere:    {nom:"Prière",         var:"--priere"},
+  jeune:     {nom:"Jeûne & prière", var:"--jeune"},
+  seminaire: {nom:"Séminaire",      var:"--seminaire"},
+  detente:   {nom:"Détente",        var:"--detente"},
+  formation: {nom:"Formation",      var:"--formation"},
+  autre:     {nom:"Autre",          var:"--autre"}
+};
+var ORDRE_TYPES = ["rentree","priere","jeune","seminaire","detente","formation","autre"];
+var MOIS = ["janvier","février","mars","avril","mai","juin","juillet","août","septembre","octobre","novembre","décembre"];
+var JOURS = ["dimanche","lundi","mardi","mercredi","jeudi","vendredi","samedi"];
+var DEBUT = {an:2026, mois:8}; // septembre 2026
+
+function e(date,titre,type,heure,lieu,qui,notes){
+  return {id:"e"+(++e.n), date:date, titre:titre, type:type, heure:heure||"",
+          lieu:lieu||"", qui:qui||"", notes:notes||"", statut:"a-caler"};
+}
+e.n = 0;
+
+function proposition(){
+  e.n = 0;
+  var L = "Église la Rencontre";
+  return [
+    e("2026-09-26","Journée de rentrée de la section","rentree","9h30 – 16h",L,"Pierre-Elie","Vision de la saison, charte de l'équipe, présentation des groupes et des rotations, remise du planning de l'année. Repas partagé le midi."),
+
+    e("2026-10-02","Prière d'équipe","priere","20h00",L,"","Ouverture de la saison : on prie les uns pour les autres et on accueille les nouveaux."),
+    e("2026-10-10","Jeûne & prière — consacrer la saison","jeune","7h – 12h",L,"","Thème : remettre l'année, les instruments et les cœurs. Fin du jeûne autour d'un petit-déjeuner."),
+    e("2026-10-16","Prière d'équipe","priere","20h00",L,"",""),
+    e("2026-10-17","Formation technique — le son, les bases","formation","10h – 12h30",L,"","Balance, retours et in-ear, gestion du volume sur scène. Atelier pratique sur l'installation."),
+    e("2026-10-24","Temps détente — soirée jeux et repas partagé","detente","19h00","Chez un membre","",""),
+    e("2026-10-30","Prière d'équipe","priere","20h00",L,"",""),
+
+    e("2026-11-07","Jeûne & prière — pour l'église et ses responsables","jeune","7h – 12h",L,"",""),
+    e("2026-11-13","Prière d'équipe","priere","20h00",L,"",""),
+    e("2026-11-14","Séminaire 1 — Pourquoi nous adorons","seminaire","9h – 16h",L,"Pierre-Elie","Fondations bibliques de l'adoration, place de la louange dans le culte, ce qu'on attend d'un membre de l'équipe. Prévoir un intervenant extérieur."),
+    e("2026-11-22","Temps détente — brunch d'équipe après le culte","detente","13h00","","",""),
+    e("2026-11-27","Prière d'équipe","priere","20h00",L,"",""),
+
+    e("2026-12-05","Jeûne & prière — action de grâce pour l'année","jeune","7h – 12h",L,"",""),
+    e("2026-12-11","Prière d'équipe","priere","20h00",L,"","Dernière prière avant la trêve : pas de rencontre le 25 décembre."),
+    e("2026-12-12","Formation spirituelle — la vie de prière du musicien","formation","10h – 12h00",L,"","Ce qui se passe avant de monter sur scène : temps personnel, lecture, discipline."),
+    e("2026-12-19","Temps détente — repas de Noël de l'équipe","detente","19h00","","",""),
+
+    e("2027-01-08","Prière d'équipe — reprise","priere","20h00",L,"",""),
+    e("2027-01-09","Jeûne & prière — vision et direction de l'année","jeune","7h – 12h",L,"",""),
+    e("2027-01-16","Temps détente — galette des rois","detente","16h00","","",""),
+    e("2027-01-22","Prière d'équipe","priere","20h00",L,"",""),
+
+    e("2027-02-05","Prière d'équipe","priere","20h00",L,"",""),
+    e("2027-02-06","Jeûne & prière — l'unité de l'équipe","jeune","7h – 12h",L,"",""),
+    e("2027-02-13","Séminaire 2 — Le musicien serviteur","seminaire","9h – 16h",L,"","Cœur, caractère, discipline. Gérer les tensions, la critique et l'ego dans une équipe.") ,
+    e("2027-02-19","Prière d'équipe","priere","20h00",L,"",""),
+    e("2027-02-20","Temps détente — sortie d'équipe","detente","19h00","Bowling ou restaurant","",""),
+    e("2027-02-27","Formation technique — construire un set","formation","10h – 12h30",L,"","Tonalités, transitions, modulations, enchaînements. Chacun repart avec un set travaillé."),
+
+    e("2027-03-05","Prière d'équipe","priere","20h00",L,"",""),
+    e("2027-03-06","Jeûne & prière — vers Pâques, la croix et la résurrection","jeune","7h – 12h",L,"","Pâques tombe le 28 mars : préparer les cultes de la semaine sainte."),
+    e("2027-03-19","Prière d'équipe","priere","20h00",L,"",""),
+    e("2027-03-27","Temps détente — après-midi en plein air","detente","14h00","","",""),
+
+    e("2027-04-02","Prière d'équipe","priere","20h00",L,"",""),
+    e("2027-04-10","Jeûne & prière — pour les âmes et l'évangélisation","jeune","7h – 12h",L,"",""),
+    e("2027-04-16","Prière d'équipe","priere","20h00",L,"",""),
+    e("2027-04-17","Formation spirituelle — servir sans s'épuiser","formation","10h – 12h00",L,"","Rythme de vie, disponibilité, savoir dire non. Point individuel sur la charge de chacun."),
+    e("2027-04-24","Temps détente — pique-nique / barbecue","detente","12h00","","",""),
+    e("2027-04-30","Prière d'équipe","priere","20h00",L,"",""),
+
+    e("2027-05-08","Jeûne & prière — pour la relève et les nouveaux","jeune","7h – 12h",L,"",""),
+    e("2027-05-14","Prière d'équipe","priere","20h00",L,"",""),
+    e("2027-05-15","Séminaire 3 — Conduire l'assemblée","seminaire","9h – 16h",L,"","La dynamique d'un temps de louange : lecture de la salle, transitions, parole au micro, travail avec le pasteur."),
+    e("2027-05-23","Temps détente — sortie d'équipe","detente","14h00","","",""),
+    e("2027-05-28","Prière d'équipe","priere","20h00",L,"",""),
+
+    e("2027-06-05","Jeûne & prière — fin de saison","jeune","7h – 12h",L,"",""),
+    e("2027-06-11","Prière d'équipe","priere","20h00",L,"",""),
+    e("2027-06-12","Formation technique — chanter ensemble","formation","10h – 12h30",L,"","Harmonies vocales, justesse, écoute mutuelle. Travail par pupitre."),
+    e("2027-06-19","Temps détente — soirée musicale libre","detente","19h00",L,"","Jam ouverte : chacun joue ce qu'il veut, sans enjeu de culte."),
+    e("2027-06-25","Prière d'équipe","priere","20h00",L,"",""),
+    e("2027-06-26","Séminaire 4 — Bilan et vision","seminaire","9h – 16h",L,"Pierre-Elie","Ce qui a marché, ce qui a coincé, retours de chacun. Premières lignes de la saison suivante."),
+
+    e("2027-07-09","Prière d'équipe — dernière de la saison","priere","20h00",L,"",""),
+    e("2027-07-17","Temps détente — barbecue de clôture","detente","12h00","","",""),
+
+    e("2027-08-28","Préparer la rentrée 2027","autre","10h – 13h","","Pierre-Elie","Réunion des responsables : bilan de la saison, planning de l'année suivante, contacts des nouveaux.")
+  ];
+}
+
+/* ---------------- état ---------------- */
+var etat = {events: proposition(), notes: ""};
+var masques = {};
+var db = null, docRef = null, localOK = true;
+var CLE = "planning-louange-2026-2027";
+
+function couleur(t){ return "var(" + (TYPES[t] ? TYPES[t].var : "--autre") + ")"; }
+
+function dateFr(iso){
+  var p = (iso||"").split("-");
+  if(p.length !== 3) return "";
+  var d = new Date(+p[0], +p[1]-1, +p[2]);
+  if(isNaN(d)) return "";
+  return JOURS[d.getDay()] + " " + (+p[2]) + " " + MOIS[+p[1]-1];
+}
+
+function clefMois(iso){ return (iso||"").slice(0,7); }
+
+function moisSaison(){
+  var out = [];
+  for(var i=0;i<12;i++){
+    var m = DEBUT.mois + i, an = DEBUT.an + Math.floor(m/12);
+    m = m % 12;
+    out.push({an:an, mois:m, clef: an + "-" + String(m+1).padStart(2,"0")});
+  }
+  return out;
+}
+
+function tries(){
+  return etat.events.slice().sort(function(a,b){
+    return (a.date||"9999") < (b.date||"9999") ? -1 : (a.date === b.date ? 0 : 1);
+  });
+}
+
+/* ---------------- rendu ---------------- */
+function rendu(){
+  var liste = tries(), mois = moisSaison(), parMois = {};
+  liste.forEach(function(ev){
+    var k = clefMois(ev.date);
+    (parMois[k] = parMois[k] || []).push(ev);
+  });
+
+  // aperçu
+  var rythme = document.getElementById("rythme");
+  rythme.innerHTML = "";
+  mois.forEach(function(m){
+    var col = document.createElement("button");
+    col.className = "mois-col";
+    col.type = "button";
+    col.setAttribute("aria-label","Aller à " + MOIS[m.mois]);
+    var pile = document.createElement("div");
+    pile.className = "pile";
+    (parMois[m.clef]||[]).forEach(function(ev){
+      var d = document.createElement("span");
+      d.className = "pt";
+      d.style.setProperty("--c", couleur(ev.type));
+      pile.appendChild(d);
+    });
+    var lettre = document.createElement("span");
+    lettre.className = "m-lettre";
+    lettre.textContent = MOIS[m.mois].slice(0,3);
+    var nb = document.createElement("span");
+    nb.className = "m-nb";
+    nb.textContent = (parMois[m.clef]||[]).length || "—";
+    col.appendChild(pile); col.appendChild(lettre); col.appendChild(nb);
+    col.addEventListener("click", function(){
+      var cible = document.getElementById("m-" + m.clef);
+      if(cible) cible.scrollIntoView({behavior:"smooth", block:"start"});
+    });
+    rythme.appendChild(col);
+  });
+
+  // filtres
+  var leg = document.getElementById("legende");
+  leg.innerHTML = "";
+  ORDRE_TYPES.forEach(function(t){
+    var n = liste.filter(function(ev){ return ev.type === t; }).length;
+    if(!n && t === "autre") return;
+    var b = document.createElement("button");
+    b.className = "filtre"; b.type = "button";
+    b.style.setProperty("--c", couleur(t));
+    b.setAttribute("aria-pressed", masques[t] ? "false" : "true");
+    b.innerHTML = '<span class="puce"></span>' + TYPES[t].nom + ' <span class="n">' + n + '</span>';
+    b.addEventListener("click", function(){
+      masques[t] = !masques[t];
+      document.body.classList.toggle("masque-" + t, !!masques[t]);
+      b.setAttribute("aria-pressed", masques[t] ? "false" : "true");
+    });
+    leg.appendChild(b);
+  });
+
+  // mois
+  var annee = document.getElementById("annee");
+  annee.innerHTML = "";
+  mois.forEach(function(m){
+    var sec = document.createElement("section");
+    sec.className = "mois"; sec.id = "m-" + m.clef;
+    var tete = document.createElement("div");
+    tete.className = "mois-tete";
+    tete.innerHTML = '<h2>' + MOIS[m.mois] + '</h2><span class="an">' + m.an + '</span>';
+    var add = document.createElement("button");
+    add.className = "btn ajout"; add.type = "button"; add.textContent = "+ Ajouter";
+    add.addEventListener("click", function(){ ajouter(m.clef + "-15"); });
+    tete.appendChild(add);
+    sec.appendChild(tete);
+
+    var evs = parMois[m.clef] || [];
+    if(!evs.length){
+      var v = document.createElement("p");
+      v.className = "vide";
+      v.textContent = "Rien de prévu — mois de respiration.";
+      sec.appendChild(v);
+    }
+    evs.forEach(function(ev){ sec.appendChild(carte(ev)); });
+    annee.appendChild(sec);
+  });
+
+  document.querySelectorAll(".f-notes").forEach(pousse);
+}
+
+function carte(ev){
+  var a = document.createElement("article");
+  a.className = "evt"; a.dataset.id = ev.id; a.dataset.type = ev.type;
+  a.style.setProperty("--c", couleur(ev.type));
+
+  var opts = ORDRE_TYPES.map(function(t){
+    return '<option value="' + t + '"' + (t === ev.type ? " selected" : "") + '>' + TYPES[t].nom + '</option>';
+  }).join("");
+
+  a.innerHTML =
+    '<div class="bande"></div><div class="corps">' +
+      '<div class="l1">' +
+        '<input class="f-date" type="date" value="' + esc(ev.date) + '" aria-label="Date">' +
+        '<input class="f-titre" value="' + esc(ev.titre) + '" placeholder="Nom du temps" aria-label="Titre">' +
+        '<select class="f-type" aria-label="Type">' + opts + '</select>' +
+      '</div>' +
+      '<div class="l2">' +
+        '<span class="mini jour">' + dateFr(ev.date) + '</span>' +
+        '<input class="f-heure mini" value="' + esc(ev.heure) + '" placeholder="20h00" aria-label="Horaire">' +
+        '<input class="f-lieu mini" value="' + esc(ev.lieu) + '" placeholder="Lieu" aria-label="Lieu">' +
+        '<input class="f-qui mini" value="' + esc(ev.qui) + '" placeholder="Qui pilote" aria-label="Responsable">' +
+        '<button class="statut" type="button" data-s="' + ev.statut + '">' + (ev.statut === "confirme" ? "Confirmé" : "À caler") + '</button>' +
+        '<span class="actions">' +
+          '<button class="ic dupli" type="button" title="Dupliquer">Dupliquer</button>' +
+          '<button class="ic suppr" type="button" title="Supprimer">Supprimer</button>' +
+        '</span>' +
+      '</div>' +
+      '<textarea class="f-notes" placeholder="Objectif, contenu, préparation…">' + esc(ev.notes) + '</textarea>' +
+    '</div>';
+  return a;
+}
+
+function esc(s){
+  return String(s == null ? "" : s).replace(/&/g,"&amp;").replace(/</g,"&lt;")
+    .replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+}
+function pousse(ta){ ta.style.height = "auto"; ta.style.height = ta.scrollHeight + "px"; }
+function trouve(id){
+  for(var i=0;i<etat.events.length;i++) if(etat.events[i].id === id) return etat.events[i];
+  return null;
+}
+
+/* ---------------- interactions ---------------- */
+var annee = document.getElementById("annee");
+
+annee.addEventListener("input", function(ev){
+  var art = ev.target.closest(".evt"); if(!art) return;
+  var o = trouve(art.dataset.id); if(!o) return;
+  var t = ev.target;
+  if(t.classList.contains("f-titre")) o.titre = t.value;
+  else if(t.classList.contains("f-heure")) o.heure = t.value;
+  else if(t.classList.contains("f-lieu")) o.lieu = t.value;
+  else if(t.classList.contains("f-qui")) o.qui = t.value;
+  else if(t.classList.contains("f-notes")){ o.notes = t.value; pousse(t); }
+  else return;
+  planifie();
+});
+
+annee.addEventListener("change", function(ev){
+  var art = ev.target.closest(".evt"); if(!art) return;
+  var o = trouve(art.dataset.id); if(!o) return;
+  var t = ev.target;
+  if(t.classList.contains("f-date")){ o.date = t.value; planifie(); rendu(); }
+  else if(t.classList.contains("f-type")){
+    o.type = t.value;
+    art.dataset.type = o.type;
+    art.style.setProperty("--c", couleur(o.type));
+    planifie(); rendu();
+  }
+});
+
+annee.addEventListener("click", function(ev){
+  var art = ev.target.closest(".evt"); if(!art) return;
+  var o = trouve(art.dataset.id); if(!o) return;
+  var t = ev.target;
+  if(t.classList.contains("statut")){
+    o.statut = o.statut === "confirme" ? "a-caler" : "confirme";
+    t.dataset.s = o.statut;
+    t.textContent = o.statut === "confirme" ? "Confirmé" : "À caler";
+    planifie();
+  } else if(t.classList.contains("suppr")){
+    etat.events = etat.events.filter(function(x){ return x.id !== o.id; });
+    planifie(); rendu();
+  } else if(t.classList.contains("dupli")){
+    var c = JSON.parse(JSON.stringify(o));
+    c.id = "e" + (++e.n) + "-" + Date.now().toString(36);
+    etat.events.push(c);
+    planifie(); rendu();
+  }
+});
+
+function ajouter(date){
+  var n = {id:"e" + (++e.n) + "-" + Date.now().toString(36), date:date, titre:"",
+           type:"autre", heure:"", lieu:"", qui:"", notes:"", statut:"a-caler"};
+  etat.events.push(n);
+  planifie(); rendu();
+  var champ = document.querySelector('.evt[data-id="' + n.id + '"] .f-titre');
+  if(champ){ champ.scrollIntoView({block:"center", behavior:"smooth"}); champ.focus(); }
+}
+
+document.getElementById("btn-ajout").addEventListener("click", function(){
+  var d = new Date();
+  ajouter(d.getFullYear() + "-" + String(d.getMonth()+1).padStart(2,"0") + "-" + String(d.getDate()).padStart(2,"0"));
+});
+
+document.getElementById("btn-print").addEventListener("click", function(){ window.print(); });
+
+document.getElementById("btn-reset").addEventListener("click", function(){
+  if(!confirm("Remplacer le planning actuel par la proposition de départ ? Tes modifications seront perdues.")) return;
+  etat.events = proposition(); etat.notes = document.getElementById("notes").value;
+  planifie(); rendu();
+});
+
+var notes = document.getElementById("notes");
+notes.addEventListener("input", function(){ etat.notes = notes.value; pousse(notes); planifie(); });
+
+/* ---------------- export agenda ---------------- */
+function ics(){
+  var l = ["BEGIN:VCALENDAR","VERSION:2.0","PRODID:-//Louange//Planning//FR","CALSCALE:GREGORIAN"];
+  tries().forEach(function(o){
+    if(!o.date) return;
+    var d = o.date.replace(/-/g,"");
+    var fin = new Date(o.date + "T12:00:00");
+    fin.setDate(fin.getDate()+1);
+    var df = fin.getFullYear() + String(fin.getMonth()+1).padStart(2,"0") + String(fin.getDate()).padStart(2,"0");
+    var desc = [o.heure, o.qui ? "Pilote : " + o.qui : "", o.notes].filter(Boolean).join("\\n");
+    l.push("BEGIN:VEVENT");
+    l.push("UID:" + o.id + "@louange");
+    l.push("DTSTART;VALUE=DATE:" + d);
+    l.push("DTEND;VALUE=DATE:" + df);
+    l.push("SUMMARY:" + ical((o.heure ? o.heure + " — " : "") + (o.titre || TYPES[o.type].nom)));
+    if(o.lieu) l.push("LOCATION:" + ical(o.lieu));
+    if(desc) l.push("DESCRIPTION:" + ical(desc));
+    l.push("END:VEVENT");
+  });
+  l.push("END:VCALENDAR");
+  return l.join("\r\n");
+}
+function ical(s){ return String(s).replace(/([,;\\])/g,"\\$1").replace(/\n/g,"\\n"); }
+
+document.getElementById("btn-ics").addEventListener("click", async function(){
+  var contenu = ics(), nom = "louange-saison-2026-2027.ics";
+  try{
+    var dl = await window.claude.use("downloads");
+    if(dl){ await dl.save({filename:nom, data:contenu}); dis("Fichier .ics prêt"); return; }
+  }catch(err){
+    if(err && err.code === "cancelled") return;
+  }
+  try{
+    var url = URL.createObjectURL(new Blob([contenu], {type:"text/calendar"}));
+    var a = document.createElement("a"); a.href = url; a.download = nom; a.click();
+    setTimeout(function(){ URL.revokeObjectURL(url); }, 2000);
+  }catch(e2){
+    dis("L'export n'est pas disponible ici — utilise Imprimer");
+  }
+});
+
+/* ---------------- sauvegarde ---------------- */
+var timer = null, etatEl = document.getElementById("etat");
+function dis(t){ etatEl.textContent = t; }
+function planifie(){
+  dis("Modifications en cours…");
+  clearTimeout(timer);
+  timer = setTimeout(enregistre, 700);
+}
+async function enregistre(){
+  var corps = {events: etat.events, notes: etat.notes, maj: new Date().toISOString()};
+  var ok = false;
+  if(docRef){
+    try{ await docRef.set(corps); ok = true; }catch(err){ ok = false; }
+  }
+  if(localOK){
+    try{ localStorage.setItem(CLE, JSON.stringify(corps)); }catch(err){ localOK = false; }
+  }
+  var h = new Date();
+  dis((ok ? "Enregistré à " : "Gardé dans ce navigateur, ") +
+      String(h.getHours()).padStart(2,"0") + ":" + String(h.getMinutes()).padStart(2,"0"));
+}
+
+function charge(corps){
+  if(!corps || !Array.isArray(corps.events) || !corps.events.length) return false;
+  etat.events = corps.events.map(function(o){
+    return {id:o.id || ("e"+(++e.n)), date:o.date||"", titre:o.titre||"", type:TYPES[o.type]?o.type:"autre",
+            heure:o.heure||"", lieu:o.lieu||"", qui:o.qui||"", notes:o.notes||"", statut:o.statut||"a-caler"};
+  });
+  etat.notes = typeof corps.notes === "string" ? corps.notes : "";
+  notes.value = etat.notes;
+  return true;
+}
+
+rendu();
+pousse(notes);
+
+(async function demarre(){
+  var local = null;
+  try{
+    var brut = localStorage.getItem(CLE);
+    if(brut) local = JSON.parse(brut);
+  }catch(err){ localOK = false; }
+  if(local && charge(local)){ rendu(); pousse(notes); dis("Version gardée dans ce navigateur"); }
+
+  var base = null;
+  try{ base = await window.claude.use("db"); }catch(err){ base = null; }
+  if(!base) return;
+  db = base;
+  docRef = db.doc("planning/saison-2026-2027");
+  try{
+    var snap = await docRef.get();
+    if(snap && snap.exists && charge(snap.data())){ rendu(); pousse(notes); dis("Planning chargé"); }
+    else{ await enregistre(); }
+  }catch(err){ docRef = null; }
+})();
+
+ORDRE_TYPES.forEach(function(t){
+  var s = document.createElement("style");
+  s.textContent = "body.masque-" + t + ' .evt[data-type="' + t + '"]{display:none}';
+  document.head.appendChild(s);
+});
+
+})();
+</script>
+</body>
+</html>
