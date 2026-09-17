@@ -544,6 +544,11 @@ annee.addEventListener("click", function(ev){
     t.textContent = o.statut === "confirme" ? "Confirmé" : "À caler";
     planifie();
   } else if(t.classList.contains("suppr")){
+    /* Le planning est partagé : une suppression retire le temps chez tout le monde. */
+    var quoi = o.titre || TYPES[o.type].nom;
+    var quand = dateFr(o.date) || o.date;
+    if(!confirm("Supprimer « " + quoi + " »" + (quand ? " du " + quand : "") +
+                " ?\n\nLe temps disparaît pour toute l'équipe.")) return;
     etat.events = etat.events.filter(function(x){ return x.id !== o.id; });
     planifie(); rendu();
   } else if(t.classList.contains("dupli")){
